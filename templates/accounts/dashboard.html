@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-4">📊 Welcome, {{ user.get_full_name|default:user.username }}</h3>
+
+    <div class="row g-4">
+
+        {# ---------------- ADMIN DASHBOARD ---------------- #}
+        {% if user.role == "Admin" %}
+        <h3 class="mb-4">📊 Admin Dashboard</h3>
+
+        <!-- Stat Cards -->
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-gradient-primary shadow-lg p-3 card-hover">
+                    <div class="card-body">
+                        <i class="bi bi-people-fill fs-2 mb-2"></i>
+                        <h6>Students</h6>
+                        <p class="fs-3">{{ admin_total_students }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-gradient-info shadow-lg p-3 card-hover">
+                    <div class="card-body">
+                        <i class="bi bi-person-workspace fs-2 mb-2"></i>
+                        <h6>Lecturers</h6>
+                        <p class="fs-3">{{ admin_total_lecturers }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-gradient-warning shadow-lg p-3 card-hover">
+                    <div class="card-body">
+                        <i class="bi bi-book fs-2 mb-2"></i>
+                        <h6>Courses</h6>
+                        <p class="fs-3">{{ admin_total_courses }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-gradient-success shadow-lg p-3 card-hover">
+                    <div class="card-body">
+                        <i class="bi bi-diagram-3 fs-2 mb-2"></i>
+                        <h6>Allocations</h6>
+                        <p class="fs-3">{{ admin_total_allocations }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart + Activity -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-light fw-bold">📊 Course Allocations</div>
+                    <div class="card-body">
+                        <canvas id="allocChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-light fw-bold">📝 Recent Activity</div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">+ New student registered</li>
+                            <li class="list-group-item">📌 Lecturer assigned to CSC101</li>
+                            <li class="list-group-item">📚 Course added: MTH201</li>
+                            <li class="list-group-item">✅ Allocation updated</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+
+        {# ---------------- LECTURER DASHBOARD ---------------- #}
+        {% if user.role == "Lecturer" %}
+        <h3 class="mb-4">👨‍🏫 Lecturer Dashboard</h3>
+
+        <!-- Stat Cards -->
+        <div class="row text-center">
+            <div class="col-md-6 mb-3">
+                <div class="card text-white bg-gradient-primary shadow-lg p-3">
+                    <div class="card-body">
+                        <i class="bi bi-journal-text fs-2 mb-2"></i>
+                        <h6>Assigned Courses</h6>
+                        <p class="fs-3">{{ lecturer_total_courses }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card text-white bg-gradient-success shadow-lg p-3">
+                    <div class="card-body">
+                        <i class="bi bi-people fs-2 mb-2"></i>
+                        <h6>Enrolled Students</h6>
+                        <p class="fs-3">{{ lecturer_total_students }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bars -->
+        <h4 class="mt-5">📚 Course Progress</h4>
+        <div class="card shadow-lg p-3">
+            {% for course in lecturer_courses %}
+            <div class="mb-3">
+                <strong>{{ course.code }} - {{ course.title }}</strong>
+                <div class="progress mt-1" style="height: 20px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: 50%;">
+                        {{ course.eligibility_percent|default:50 }}%
+                    </div>
+                </div>
+            </div>
+
+
+            {% empty %}
+            <p class="text-muted">No courses assigned yet.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Course Table -->
+        <h4 class="mt-5">🕒 My Courses</h4>
+        <table class="table table-striped table-bordered mt-3">
+            <thead class="table-light">
+                <tr>
+                    <th>Course Code</th>
+                    <th>Title</th>
+                    <th>Students Enrolled</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in lecturer_courses %}
+                <tr>
+                    <td>{{ course.code }}</td>
+                    <td>{{ course.title }}</td>
+                    <td>{{ course.enrollments.count }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-center text-muted">No courses assigned.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+
+        {# ---------------- STUDENT DASHBOARD ---------------- #}
+        {% if user.role == "Student" %}
+        <h3 class="mb-4">🎓 Student Dashboard</h3>
+
+        <!-- Stat Cards -->
+        <div class="row text-center">
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-gradient-primary shadow-lg p-3">
+                    <div class="card-body">
+                        <i class="bi bi-book fs-2 mb-2"></i>
+                        <h6>My Courses</h6>
+                        <p class="fs-3">{{ student_total_courses }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-gradient-success shadow-lg p-3">
+                    <div class="card-body">
+                        <i class="bi bi-graph-up fs-2 mb-2"></i>
+                        <h6>Predicted GPA</h6>
+                        <p class="fs-3">{{ student_gpa }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-gradient-warning shadow-lg p-3">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle fs-2 mb-2"></i>
+                        <h6>Exam Eligibility</h6>
+                        <p class="fs-3">{{ student_exam_eligibility }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GPA Chart -->
+        <div class="card shadow-lg mt-4" style="height: 400px; width: 680px;">
+            <div class="card-header bg-light fw-bold">📈 GPA Trend</div>
+            <div class="card-body">
+                <canvas id="gpaChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Course Table -->
+        <h4 class="mt-5">🕒 My Courses</h4>
+        <table class="table table-striped table-bordered mt-3">
+            <thead class="table-light">
+                <tr>
+                    <th>Course Code</th>
+                    <th>Title</th>
+                    <th>Lecturer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in student_courses %}
+                <tr>
+                    <td>{{ course.code }}</td>
+                    <td>{{ course.title }}</td>
+                    <td>{{ course.lecturer.username }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-center text-muted">No courses yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Admin Allocations Chart
+    // {% if user.role == "Admin" %}
+    // const ctx1 = document.getElementById('allocChart');
+    // new Chart(ctx1, {
+    //     type: 'pie',
+    //     data: {
+    //         labels: ['Lecturer A', 'Lecturer B', 'Lecturer C'],
+    //         datasets: [{
+    //             data: [10, 15, 5],
+    //             backgroundColor: ['#0d6efd', '#198754', '#ffc107']
+    //         }]
+    //     }
+    // });
+    // {% endif %}
+
+    // Student GPA Chart
+    {% if user.role == "Student" %}
+    const ctx2 = document.getElementById('gpaChart');
+    new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: ['Year 1', 'Year 2', 'Year 3'],
+            datasets: [{
+                label: 'GPA',
+                data: [2.2, 2.9, {{ student_gpa|default:3.8 }}],
+                borderColor: '#0d6efd',
+                fill: false,
+                tension: 0.3
+            }]
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

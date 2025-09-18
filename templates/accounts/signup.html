@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+    <h2 class="mb-4 text-center">Create Account</h2>
+
+    <form method="POST" class="card p-4 shadow-lg border-0 rounded-3 bg-light">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+    
+        <!-- Username -->
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            {{ form.username }}
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            {{ form.email }}
+        </div>
+
+        <!-- Role -->
+        <div class="mb-3">
+            <label class="form-label">Account Type</label>
+            {{ form.role }}
+        </div>
+
+        <!-- Matric Number (Student Only) -->
+        <div class="mb-3" id="matric-field" style="display: none;">
+            <label class="form-label">Matric Number</label>
+            {{ form.matric_no }}
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            {{ form.password1 }}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            {{ form.password2 }}
+        </div>
+
+        <!-- Error messages -->
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                {{ form.errors }}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-success w-100">Create Account</button>
+    </form>
+
+    <p class="mt-3 text-center">
+        Already have an account? <a href="{% url 'login' %}">Login</a>
+    </p>
+</div>
+
+<!-- JavaScript to toggle Matric Number field -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const roleSelect = document.getElementById("id_role");
+        const matricInput = document.getElementById("id_matric_no").closest(".mb-3");
+        const matricField = document.getElementById("id_matric_no");
+
+        function toggleMatric() {
+            if (roleSelect.value === "Student") {
+                matricInput.style.display = "block";
+                matricField.setAttribute("required", "required");
+            } else {
+                matricInput.style.display = "none";
+                matricField.removeAttribute("required");
+                matricField.value = "";  // clear value if hidden
+            }
+        }
+
+        // Run on load
+        toggleMatric();
+
+        // Run whenever role changes
+        roleSelect.addEventListener("change", toggleMatric);
+    });
+</script>
+{% endblock %}
+
