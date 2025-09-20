@@ -1,13 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import User
-
-
-
-# class LoginForm(AuthenticationForm):
-#     username = forms.CharField(label="Username or Matric No")
-#     password = forms.CharField(widget=forms.PasswordInput)
-
+from .models import User, Profile
 
 
 class StyledFormMixin:
@@ -27,7 +20,7 @@ class SignupForm(StyledFormMixin, UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'role','matric_no', 'password1', 'password2']
+        fields = ['first_name','last_name','username', 'email', 'role','matric_no', 'password1', 'password2']
         
     def clean(self):
         cleaned_data = super().clean()
@@ -56,3 +49,16 @@ class CustomLoginForm(StyledFormMixin, AuthenticationForm):
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
             visible.field.widget.attrs['placeholder'] = visible.label
+
+
+
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'matric_no']
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['image']

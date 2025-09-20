@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
+{% load static %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="{% static 'style.css' %}">
 <div class="container mt-4">
-    <h3 class="mb-4">📊 Welcome, {{ user.get_full_name|default:user.username }}</h3>
+    <!-- <h3 class="mb-4">📊 Welcome, {{ user.get_full_name|default:user.username }}</h3> -->
 
     <div class="row g-4">
 
@@ -9,46 +13,56 @@
         {% if user.role == "Admin" %}
         <h3 class="mb-4">📊 Admin Dashboard</h3>
 
-        <!-- Stat Cards -->
+        <!-- Admin Stat Cards -->
         <div class="row text-center">
+            <!-- Students -->
             <div class="col-md-3 mb-3">
-                <div class="card text-white bg-gradient-primary shadow-lg p-3 card-hover">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #4e73df, #224abe);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-people-fill fs-2 mb-2"></i>
-                        <h6>Students</h6>
-                        <p class="fs-3">{{ admin_total_students }}</p>
+                        <h6 class="fw-bold">Students</h6>
+                        <p class="fs-3 mb-0">{{ admin_total_students }}</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Lecturers -->
             <div class="col-md-3 mb-3">
-                <div class="card text-white bg-gradient-info shadow-lg p-3 card-hover">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #36b9cc, #117a8b);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-person-workspace fs-2 mb-2"></i>
-                        <h6>Lecturers</h6>
-                        <p class="fs-3">{{ admin_total_lecturers }}</p>
+                        <h6 class="fw-bold">Lecturers</h6>
+                        <p class="fs-3 mb-0">{{ admin_total_lecturers }}</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Courses -->
             <div class="col-md-3 mb-3">
-                <div class="card text-white bg-gradient-warning shadow-lg p-3 card-hover">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #f7971e, #ffd200);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-book fs-2 mb-2"></i>
-                        <h6>Courses</h6>
-                        <p class="fs-3">{{ admin_total_courses }}</p>
+                        <h6 class="fw-bold">Courses</h6>
+                        <p class="fs-3 mb-0">{{ admin_total_courses }}</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Allocations -->
             <div class="col-md-3 mb-3">
-                <div class="card text-white bg-gradient-success shadow-lg p-3 card-hover">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #1cc88a, #0f9d58);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-diagram-3 fs-2 mb-2"></i>
-                        <h6>Allocations</h6>
-                        <p class="fs-3">{{ admin_total_allocations }}</p>
+                        <h6 class="fw-bold">Allocations</h6>
+                        <p class="fs-3 mb-0">{{ admin_total_allocations }}</p>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Chart + Activity -->
         <div class="row mt-4">
             <div class="col-md-6">
@@ -82,41 +96,44 @@
 
         <!-- Stat Cards -->
         <div class="row text-center">
+            <!-- Assigned Courses -->
             <div class="col-md-6 mb-3">
-                <div class="card text-white bg-gradient-primary shadow-lg p-3">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #4e73df, #224abe);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-journal-text fs-2 mb-2"></i>
-                        <h6>Assigned Courses</h6>
-                        <p class="fs-3">{{ lecturer_total_courses }}</p>
+                        <h6 class="fw-bold">Assigned Courses</h6>
+                        <p class="fs-3 mb-0">{{ total_courses }}</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Enrolled Students -->
             <div class="col-md-6 mb-3">
-                <div class="card text-white bg-gradient-success shadow-lg p-3">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #1cc88a, #0f9d58);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-people fs-2 mb-2"></i>
-                        <h6>Enrolled Students</h6>
-                        <p class="fs-3">{{ lecturer_total_students }}</p>
+                        <h6 class="fw-bold">Enrolled Students</h6>
+                        <p class="fs-3 mb-0">{{ total_students }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Progress Bars -->
-        <h4 class="mt-5">📚 Course Progress</h4>
+        <h4 class="mt-5 fw-bold">📚 Course Progress</h4>
         <div class="card shadow-lg p-3">
-            {% for course in lecturer_courses %}
+            {% for item in course_progress %}
             <div class="mb-3">
-                <strong>{{ course.code }} - {{ course.title }}</strong>
-                <div class="progress mt-1" style="height: 20px;">
-                    <div class="progress-bar bg-success" role="progressbar" 
-                         style="width: 50%;">
-                        {{ course.eligibility_percent|default:50 }}%
+                <strong>{{ item.course.code }} - {{ item.course.title }}</strong>
+                <div class="progress mt-1" style="height: 20px; border-radius: 10px;">
+                    <div class="progress-bar bg-success" role="progressbar"
+                        style="width: {{ item.progress }}%; border-radius: 10px;">
+                        {{ item.progress }}%
                     </div>
                 </div>
             </div>
-
-
             {% empty %}
             <p class="text-muted">No courses assigned yet.</p>
             {% endfor %}
@@ -130,6 +147,7 @@
                     <th>Course Code</th>
                     <th>Title</th>
                     <th>Students Enrolled</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -138,12 +156,24 @@
                     <td>{{ course.code }}</td>
                     <td>{{ course.title }}</td>
                     <td>{{ course.enrollments.count }}</td>
+                    <td>
+                        <!-- Mark Attendance -->
+                        <a href="{% url 'mark_attendance' course.id %}" class="btn btn-sm btn-outline-success me-2">
+                            📋 Attendance
+                        </a>
+                        
+                        <!-- Upload Grades -->
+                        <a href="{% url 'upload_grades' course.id %}" class="btn btn-sm btn-outline-primary">
+                            📝 Grades
+                        </a>
+                    </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="3" class="text-center text-muted">No courses assigned.</td></tr>
+                <tr><td colspan="4" class="text-center text-muted">No courses assigned.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
+
         {% endif %}
 
 
@@ -153,34 +183,44 @@
 
         <!-- Stat Cards -->
         <div class="row text-center">
+            <!-- My Courses -->
             <div class="col-md-4 mb-3">
-                <div class="card text-white bg-gradient-primary shadow-lg p-3">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #4e73df, #224abe);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-book fs-2 mb-2"></i>
-                        <h6>My Courses</h6>
-                        <p class="fs-3">{{ student_total_courses }}</p>
+                        <h6 class="fw-bold">My Courses</h6>
+                        <p class="fs-3 mb-0">{{total_courses}}</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Predicted GPA -->
             <div class="col-md-4 mb-3">
-                <div class="card text-white bg-gradient-success shadow-lg p-3">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #1cc88a, #0f9d58);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-graph-up fs-2 mb-2"></i>
-                        <h6>Predicted GPA</h6>
-                        <p class="fs-3">{{ student_gpa }}</p>
+                        <h6 class="fw-bold">Predicted GPA</h6>
+                        <p class="fs-3 mb-0">{{gpa}}</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Exam Eligibility -->
             <div class="col-md-4 mb-3">
-                <div class="card text-white bg-gradient-warning shadow-lg p-3">
-                    <div class="card-body">
+                <div class="card text-white shadow-lg p-3 dashboard-card"
+                    style="background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-check-circle fs-2 mb-2"></i>
-                        <h6>Exam Eligibility</h6>
-                        <p class="fs-3">{{ student_exam_eligibility }}</p>
+                        <h6 class="fw-bold">Exam Eligibility</h6>
+                        <p class="fs-3 mb-0">{{eligibility}}</p>
                     </div>
                 </div>
             </div>
         </div>
+
+
 
         <!-- GPA Chart -->
         <div class="card shadow-lg mt-4" style="height: 400px; width: 680px;">
@@ -201,11 +241,11 @@
                 </tr>
             </thead>
             <tbody>
-                {% for course in student_courses %}
+                {% for course in courses %}
                 <tr>
                     <td>{{ course.code }}</td>
                     <td>{{ course.title }}</td>
-                    <td>{{ course.lecturer.username }}</td>
+                    <td>{{ course.lecturer.get_full_name }}</td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="3" class="text-center text-muted">No courses yet.</td></tr>
@@ -220,37 +260,42 @@
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Admin Allocations Chart
-    // {% if user.role == "Admin" %}
-    // const ctx1 = document.getElementById('allocChart');
-    // new Chart(ctx1, {
-    //     type: 'pie',
-    //     data: {
-    //         labels: ['Lecturer A', 'Lecturer B', 'Lecturer C'],
-    //         datasets: [{
-    //             data: [10, 15, 5],
-    //             backgroundColor: ['#0d6efd', '#198754', '#ffc107']
-    //         }]
-    //     }
-    // });
-    // {% endif %}
+    // Inject user role from Django into JS
+    const userRole = "{{ user.role }}";
 
-    // Student GPA Chart
-    {% if user.role == "Student" %}
-    const ctx2 = document.getElementById('gpaChart');
-    new Chart(ctx2, {
-        type: 'line',
-        data: {
-            labels: ['Year 1', 'Year 2', 'Year 3'],
-            datasets: [{
-                label: 'GPA',
-                data: [2.2, 2.9, {{ student_gpa|default:3.8 }}],
-                borderColor: '#0d6efd',
-                fill: false,
-                tension: 0.3
-            }]
+    if (userRole === "Admin") {
+        const ctx1 = document.getElementById('allocChart');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'pie',
+                data: {
+                    labels: ['Lecturer A', 'Lecturer B', 'Lecturer C'],
+                    datasets: [{
+                        data: [10, 15, 5],
+                        backgroundColor: ['#0d6efd', '#198754', '#ffc107']
+                    }]
+                }
+            });
         }
-    });
-    {% endif %}
+    }
+
+    if (userRole === "Student") {
+        const ctx = document.getElementById('gpaChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["ND1 First Semester", "ND1 Second Semester", "ND2 First Semester", "ND2 Second Semester"],
+                datasets: [{
+                    label: "GPA",
+                    data: {{ gpa_trend|safe }},
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    backgroundColor: "rgba(78, 115, 223, 0.2)",
+                    tension: 0.4,
+                    fill: true
+                }]
+            }
+        });
+    }
 </script>
+
 {% endblock %}

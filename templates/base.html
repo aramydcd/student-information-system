@@ -10,12 +10,46 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'style.css' %}">
   <style>
-  </style>
+    /* Notification styling */
+    .notification-item {
+      padding: 0.75rem 1rem;
+      margin: 0.25rem 0.5rem;
+      border-radius: 10px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    /* Hover effect */
+    .notification-item:hover {
+      background-color: #f0f4ff;
+      transform: translateX(3px);
+    }
+
+    /* Unread notifications */
+    .notification-item.unread {
+      background-color: #f9f9f9;
+      border-left: 4px solid #0d6efd;
+    }
+
+    /* Message text */
+    .notif-text {
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* Timestamp */
+    .notification-item small {
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+</style>
 </head>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <body>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-      <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm py-0">
+      <div class="container-fluid px-3">
           <a class="navbar-brand fw-bold" href="{% url 'home' %}">SIS Portal</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
               <span class="navbar-toggler-icon"></span>
@@ -25,60 +59,106 @@
 
                   <!-- Home -->
                   <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
-                      Home
+                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                      Home |
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
+                      About Us |
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'help' %}active{% endif %}" href="{% url 'help' %}">
+                      Help & Support |
                     </a>
                   </li>
                   {% if user.is_authenticated %}
-                      <li class="nav-item">
-                          <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a>
-                      </li>
-                      <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          👤 {{ user.username }}
-                        </a>
-                        
-                        <ul class="dropdown-menu dropdown-menu-end user-dropdown shadow" aria-labelledby="userDropdown">
-                          
-                          <!-- User Info -->
-                          <li class="dropdown-header d-flex align-items-center">
-                            <img src="{% if user.profile.image %}{{ user.profile.image.url }}{% else %}/static/images/default.jpg{% endif %}" 
-                                alt="User" class="rounded-circle me-3" width="60" height="60">
-                            <div>
-                              <h6 class="mb-0 fw-bold">{{ user.get_full_name|default:user.username }}</h6>
-                              {% if user.profile.matric_no %}
-                                <small class="text-muted">Matric: {{ user.profile.matric_no }}</small><br>
-                              {% endif %}
-                              <small class="text-muted">{{ user.email }}</small>
-                            </div>
-                          </li>
-
+                    <li class="nav-item dropdown">
+                      <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if unread_count > 0 %}
+                          <img src="../../static/icons8-notification-32.png" alt=""> 
+                        {% else %}
+                          🔔
+                        {% endif %}
+                      </a>
+                      <ul class="dropdown-menu dropdown-menu-end user-dropdown shadow-lg" aria-labelledby="notificationsDropdown" style="min-width: 420px; max-height: 400px; overflow-y: auto;">
+                        {% if all_notifications %}
+                          {% for notif in all_notifications %}
+                            <li class="notification-item {% if not notif.is_read %}unread{% endif %}">
+                              <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                  <span class="notif-text">{{ notif.message }}</span><br>
+                                  <small class="text-muted">{{ notif.created_at|timesince }} ago</small>
+                                </div>
+                                {% if not notif.is_read %}
+                                  <a href="{% url 'mark_as_read' notif.id %}" class="btn btn-sm btn-outline-primary">Mark Read</a>
+                                {% endif %}
+                              </div>
+                            </li>
+                          {% endfor %}
                           <li><hr class="dropdown-divider"></li>
-
-                          <!-- Links -->
-                          <li><a class="dropdown-item" href="#">👤 Profile</a></li>
-                          <li><a class="dropdown-item" href="#">⚙️ Settings</a></li>
-                          <li>
-                            <form method="POST" action="{% url 'logout' %}">
-                              {% csrf_token %}
-                              <button class="dropdown-item text-danger" type="submit">🚪 Logout</button>
-                            </form>
+                          <li class="text-center">
+                            <a href="{% url 'mark_all_as_read' %}" class="btn btn-sm btn-outline-secondary">✔️Mark all as read</a>
                           </li>
-                        </ul>
-                      </li>
+                        {% else %}
+                          <li><span class="dropdown-item text-muted">No notifications</span></li>
+                        {% endif %}
+                      </ul>
+                    </li>
+
+
+                    <!-- <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'logout' %}active{% endif %}" href="{% url 'logout' %}">Logout</a>
+                    </li> -->
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{% if user.profile.image %}{{ user.profile.image.url}}{% else %}/static/images/default.jpg{% endif %}" 
+                            alt="User" class="rounded-circle me-3" width="30" height="30"> {{user.username}}
+                      </a>
+
+                      <ul class="dropdown-menu dropdown-menu-end user-dropdown shadow" aria-labelledby="userDropdown">
+                        <!-- User Info -->
+                        <li class="dropdown-header d-flex align-items-center">
+                          <img src="{% if user.profile.image %}{{ user.profile.image.url }}{% else %}/static/images/default.jpg{% endif %}" 
+                              alt="User" class="rounded-circle me-3" width="60" height="60">
+                          <div>
+                            <h6 class="mb-0 fw-bold">{{ user.get_full_name|default:user.username }}</h6>
+                            {% if user.matric_no %}
+                              <small class="text-muted">{{ user.matric_no }}</small><br>
+                            {% endif %}
+                            <small class="text-muted">{{ user.email }}</small>
+                          </div>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <!-- Links -->
+                        <li><a class="dropdown-item" href="{% url 'profile' %}">👤 Profile</a></li>
+                        <li><a class="dropdown-item" href="#">⚙️ Settings</a></li>
+                        <li>
+                          <form method="POST" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button class="dropdown-item text-danger" type="submit">🚪 Logout</button>
+                          </form>
+                        </li>
+                      </ul>
+                    </li>
 
                   {% else %}
                       <li class="nav-item">
-                          <a class="nav-link {% if request.path == '/login/' %}active{% endif %}" href="{% url 'login' %}">Login</a>
+                          <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" href="{% url 'login' %}">Sign In   |</a>
                       </li>
                       <li class="nav-item">
-                          <a class="nav-link {% if request.path == '/signup/' %}active{% endif %}" href="{% url 'signup' %}">Create Account</a>
+                          <a class="nav-link {% if request.resolver_match.url_name == 'signup' %}active{% endif %}" href="{% url 'signup' %}">Sign Up</a>
                       </li>
                   {% endif %}
               </ul>
           </div>
       </div>
   </nav>
+
   <!-- Page Content -->
   <div class="container content-wrapper">
     {% block content %}{% endblock %}
@@ -90,6 +170,8 @@
           <small>&copy; {{ year|default:2025 }} Student Information System. All Rights Reserved.</small>
       </div>
   </footer>
+
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

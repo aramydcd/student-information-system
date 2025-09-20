@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<h3>📝 Upload Grades - {{ course.code }} {{ course.title }}</h3>
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label for="grade_type" class="form-label">Grade Type</label>
+        <select name="grade_type" id="grade_type" class="form-select" required>
+            <option value="">-- Select Type --</option>
+            <option value="assignment">Assignment</option>
+            <option value="test">Test</option>
+            <option value="exam">Exam</option>
+            <option value="final">Final</option>
+        </select>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for enrollment in students %}
+            <tr>
+                <td>{{ enrollment.student.get_full_name|default:enrollment.student.username }}</td>
+                <td>
+                    <input type="number" step="0.01" name="grade_{{ enrollment.student.id }}" 
+                           class="form-control" placeholder="Enter score">
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Save Grades</button>
+</form>
+{% endblock %}

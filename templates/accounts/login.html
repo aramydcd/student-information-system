@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5" style="max-width: 500px;">
-    <h2 class="mb-4 text-center">🔐 Login</h2>
+    <h2 class="mb-4 text-center">🔐 Sign In</h2>
 
     <form method="POST" class="card p-4 shadow-lg border-0 rounded-3 bg-light">
         {% csrf_token %}
@@ -25,7 +25,7 @@
             </div>
         {% endif %}
 
-        <button type="submit" class="btn btn-primary w-100">Login</button>
+        <button type="submit" class="btn btn-primary w-100">Sign In</button>
     </form>
 
     <p class="mt-3 text-center">
