@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from .models import Course, Enrollment, Grade, Attendance
 from django.contrib import messages
 from accounts.utils import create_notification
+from .forms import CourseForm
+from accounts.models import User  # adjust if needed
+
 
 
 # ✅ Notify all admins (or specific users)
@@ -153,27 +156,31 @@ def course_detail(request, pk):
 
 
 
-
 @login_required
 def add_course(request):
     if request.method == "POST":
-        name = request.POST.get("name")
-        lecturer = request.POST.get("lecturer")  # example
-        
-        course = Course.objects.create(name=name, lecturer_id=lecturer)
-        messages.success(request, f"Course '{name}' created successfully.")
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            course = form.save()
+            messages.success(request, f"Course '{course.title}' created successfully.")
 
-        # ✅ Notify all admins
-        for admin in admins:
-            create_notification(admin, f"New course '{name}' was added.")
+            # ✅ Notify all admins (optional)
+            admins = User.objects.filter(role="Admin")
+            for admin in admins:
+                create_notification(admin, f"New course '{course.title}' was added.")
 
-        # ✅ Notify the lecturer
-        if course.lecturer:
-            create_notification(course.lecturer, f"You have been assigned to '{name}'.")
+            # ✅ Notify the lecturer (optional)
+            if course.lecturer:
+                create_notification(course.lecturer, f"You have been assigned to '{course.title}'.")
 
-        return redirect("course_list")
+            return redirect("course_list")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = CourseForm()
 
-    return render(request, "courses/add_course.html")
+    return render(request, "courses/add_course.html", {"form": form})
+
 
 
 

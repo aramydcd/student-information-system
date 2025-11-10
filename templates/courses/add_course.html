@@ -1,3 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
 
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white">
+            <h4>➕ Add New Course</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="row g-3">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+                {% for field in form %}
+                    <div class="col-md-6">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        <div class="text-danger">{{ field.errors }}</div>
+                    </div>
+                {% endfor %}
+
+                <div class="col-12 mt-4 text-end">
+                    <a href="{% url 'course_list' %}" class="btn btn-secondary">⬅ Back</a>
+                    <button type="submit" class="btn btn-primary">💾 Save Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
