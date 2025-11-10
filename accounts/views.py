@@ -10,6 +10,10 @@ from accounts.models import User
 from django.contrib import messages
 from .forms import UserUpdateForm, ProfileUpdateForm
 from .models import Notification
+from django.db.models import Count
+import json
+from django.utils.safestring import mark_safe
+
 
 
 
@@ -66,65 +70,77 @@ def dashboard_view(request):
     user = request.user
     context = {}
 
+    # ===================== STUDENT DASHBOARD =====================
     if user.role == "Student":
-        # Enrollments for the student
         student_enrollments = Enrollment.objects.filter(student=user).select_related("course__lecturer")
         student_courses = [en.course for en in student_enrollments]
         total_courses = len(student_courses)
 
-
-        # Dummy GPA prediction (later we connect to Grades)
-        predicted_gpa = 3.5  
-
         gpa = calculate_gpa(user)
         exam_eligibility = calculate_exam_eligibility(user)
+        gpa_trend = [3.26, 3.36, 0.0, gpa]  # Dummy trend for now
 
-        # Example GPA trend (latest 5 semesters or random for now)
-        gpa_trend = [3.26, 3.36, 0.0, gpa]
-
-
-        context = {
+        context.update({
             "courses": student_courses,
             "total_courses": total_courses,
-            "gpa": predicted_gpa,
+            "gpa": gpa,
             "eligibility": exam_eligibility,
             "gpa_trend": gpa_trend,
-        }
+        })
 
+    # ===================== LECTURER DASHBOARD =====================
     elif user.role == "Lecturer":
-        # Courses assigned to this lecturer
         lecturer_courses = Course.objects.filter(lecturer=user).prefetch_related("enrollments")
-
-        # Stats
         total_courses = lecturer_courses.count()
         total_students = Enrollment.objects.filter(course__lecturer=user).count()
 
-        # Example: Course progress (attendance % or grade submission %)
         course_progress = []
         for course in lecturer_courses:
             total_enrolled = course.enrollments.count()
             if total_enrolled > 0:
-                # Example progress: % of students graded
                 graded = Grade.objects.filter(course=course).values("student").distinct().count()
                 progress = round((graded / total_enrolled) * 100, 1)
             else:
                 progress = 0
             course_progress.append({"course": course, "progress": progress})
 
-        context = {
+        context.update({
             "lecturer_courses": lecturer_courses,
             "total_courses": total_courses,
             "total_students": total_students,
             "course_progress": course_progress,
+        })
+
+    # ===================== ADMIN DASHBOARD =====================
+    elif user.role == "Admin":
+        students_count = User.objects.filter(role="Student").count()
+        lecturers_count = User.objects.filter(role="Lecturer").count()
+        courses_count = Course.objects.count()
+        enrollments_count = Enrollment.objects.count()
+
+        # distribution of courses among lecturers
+        lecturer_allocations = (
+            Course.objects.values("lecturer__username")
+            .annotate(course_count=Count("id"))
+            .order_by("-course_count")
+        )
+
+        lecturer_names = [item["lecturer__username"] or "Unassigned" for item in lecturer_allocations]
+        course_counts = [item["course_count"] for item in lecturer_allocations]
+
+        context = {
+            "students_count": students_count,
+            "lecturers_count": lecturers_count,
+            "courses_count": courses_count,
+            "enrollments_count": enrollments_count,
+            # Pass as proper JS arrays
+            "lecturer_names_json": mark_safe(json.dumps(lecturer_names)),
+            "course_counts_json": mark_safe(json.dumps(course_counts)),
         }
 
-    elif user.role == "Admin":
-        # Some system stats
-        context["students_count"] = User.objects.filter(role="Student").count()
-        context["courses_count"] = Course.objects.count()
-        context["enrollments_count"] = Enrollment.objects.count()
 
     return render(request, "accounts/dashboard.html", context)
+
 
 
 

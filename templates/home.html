@@ -14,7 +14,10 @@
     <!-- Hero Section -->
     <header class="py-5 text-center bg-white shadow-sm">
         <div class="container">
-            <h1 class="fw-bold text-primary">Welcome to the Student Information System</h1>
+            <h1 class="fw-bold text-primary">Welcome to the AcadSync</h1>
+            <p class="lead text-muted">A Student Information System designed and developed by</p>
+            <p class="lead text-muted">Oni Feranmi (23/105/01/F/0087)</p>
+            <p class="lead text-muted">Odu Solomon (23/105/01/F/0123)</p>
             <p class="lead text-muted">Manage courses, attendance, results, and more in one place.</p>
             {% if not user.is_authenticated %}
                 <a href="{% url 'login' %}" class="btn btn-primary btn-lg mt-3">Get Started</a>
@@ -86,6 +89,21 @@
             <h3 class="text-center mb-5 fw-bold">⚡Quick Access Dashboard</h3>
             <div class="row g-4">
 
+            <!-- ================= SHARED (ALL ROLES) ================= -->
+            {% if user.is_authenticated %}
+                <div class="col-md-3">
+                    <a href="{% url 'course_list' %}" class="text-decoration-none">
+                    <div class="card shadow-lg h-100 card-hover text-white dashboard-card"
+                        style="background: linear-gradient(135deg, #ff6f61, #e74c3c); border-radius: 1rem;">
+                        <div class="card-body text-center p-4">
+                        <i class="bi bi-columns-gap fs-1 mb-3"></i>
+                        <h5 class="fw-bold">Manage Courses</h5>
+                        <p class="small">Explore available courses and access course materials.</p>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+            {% endif %}
             <!-- ================= ADMIN ONLY ================= -->
             {% if user.is_authenticated and user.role == "Admin" %}
                 <!-- Manage Students -->
@@ -182,7 +200,7 @@
 
                 <!-- Exam Eligibility -->
                 <div class="col-md-3">
-                    <a href="#" class="text-decoration-none">
+                    <a href="{% url 'attendance_details' %}" class="text-decoration-none">
                     <div class="card shadow-lg h-100 card-hover text-white dashboard-card"
                         style="background: linear-gradient(135deg, #e83e8c, #d63384); border-radius: 1rem;">
                         <div class="card-body text-center p-4">
@@ -193,11 +211,8 @@
                     </div>
                     </a>
                 </div>
-
-
                 {% endif %}
-
-            <!-- ================= SHARED (ALL ROLES) ================= -->
+                <!-- ================= SHARED (ALL ROLES) ================= -->
             {% if user.is_authenticated %}
                 <!-- My Profile -->
                 <div class="col-md-3">
@@ -212,21 +227,7 @@
                     </div>
                     </a>
                 </div>
-
-                <div class="col-md-3">
-                    <a href="{% url 'course_list' %}" class="text-decoration-none">
-                    <div class="card shadow-lg h-100 card-hover text-white dashboard-card"
-                        style="background: linear-gradient(135deg, #ff6f61, #e74c3c); border-radius: 1rem;">
-                        <div class="card-body text-center p-4">
-                        <i class="bi bi-columns-gap fs-1 mb-3"></i>
-                        <h5 class="fw-bold">Manage Courses</h5>
-                        <p class="small">Explore available courses and access course materials.</p>
-                        </div>
-                    </div>
-                    </a>
-                </div>
                 {% endif %}
-
             </div>
         </div>
         </section>

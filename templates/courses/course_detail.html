@@ -45,10 +45,10 @@
                                 <td>{{ student.email }}</td>
                                 <td>
                                     <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar bg-success" role="progressbar"
-                                            style="width: 0%;">
-                                            {{ student.attendance_percent|default:0 }}%
-                                        </div>
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                        style="width: {{ student.attendance_percent }}%;">
+                                        {{ student.attendance_percent }}%
+                                    </div>
                                     </div>
                                 </td>
                                 <td>
@@ -75,8 +75,14 @@
     {% endif %}
 </div>
 <div class="text-center mt-4">
-    <a href="{% url 'my_courses' %}" class="btn btn-lg btn-outline-primary shadow-sm px-4 py-2 rounded-pill">
-        ⬅️ Back to Courses
-    </a>
+    {% if user.role == "Admin"%}
+        <a href="{% url 'course_list' %}" class="btn btn-lg btn-outline-primary shadow-sm px-4 py-2 rounded-pill">
+            ⬅️ Back to Courses
+        </a>
+    {% else %}
+        <a href="{% url 'my_courses' %}" class="btn btn-lg btn-outline-primary shadow-sm px-4 py-2 rounded-pill">
+            ⬅️ Back to Courses
+        </a>
+    {% endif %}
 </div>
 {% endblock %}

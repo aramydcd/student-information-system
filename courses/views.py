@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Course, Enrollment, Grade, Attendance
-from .forms import CourseForm
 from django.contrib import messages
 from accounts.utils import create_notification
 
@@ -115,11 +114,43 @@ def my_courses(request):
     )
 
 
-
 @login_required
 def course_detail(request, pk):
     course = get_object_or_404(Course, pk=pk)
-    return render(request, "courses/course_detail.html", {"course": course})
+
+    # Get all students enrolled in this course
+    enrolled_students = (
+        Enrollment.objects
+        .filter(course=course)
+        .select_related("student")
+    )
+
+    # Build a list with attendance info for each student
+    students_data = []
+    for enrollment in enrolled_students:
+        student = enrollment.student
+
+        total_classes = Attendance.objects.filter(course=course, student=student).count()
+        total_present = Attendance.objects.filter(course=course, student=student, present=True).count()
+
+        attendance_percent = round((total_present / total_classes) * 100, 1) if total_classes > 0 else 0
+
+        students_data.append({
+            "id": student.id,
+            "get_full_name": student.get_full_name(),
+            "email": student.email,
+            "profile": getattr(student, "profile", None),  # Handles missing profile gracefully
+            "attendance_percent": attendance_percent,
+            "progress": "Good" if attendance_percent >= 75 else "Low",
+        })
+
+    context = {
+        "course": course,
+        "enrolled_students": students_data,
+    }
+
+    return render(request, "courses/course_detail.html", context)
+
 
 
 
@@ -180,12 +211,38 @@ def mark_attendance(request, course_id):
             Attendance.objects.update_or_create(
                 student=enrollment.student,
                 course=course,
-                date=timezone.now().date(),
                 defaults={'present': present}
             )
+            student=enrollment.student
+            msg = f"You have been marked {'Present' if present==1 else 'Absent'} for {course.code}"
+            messages.success(request, f"Attendance Saved Successfully")
+            create_notification(student, msg)
+
         return redirect("dashboard")
 
     return render(request, "courses/mark_attendance.html", {"course": course, "students": students})
+
+
+@login_required
+def attendance_details(request):
+    student = request.user
+    query = request.GET.get("q", "").strip()  # Get search term (if any)
+
+    # Start with all enrollments
+    enrollments = Enrollment.objects.filter(student=student).select_related("course")
+
+    # Apply filter if a search query was entered
+    if query:
+        enrollments = enrollments.filter(course__code__icontains=query)
+
+    # Attach each course's attendance records
+    for enrollment in enrollments:
+        enrollment.attendance_records = Attendance.objects.filter(
+            student=student,
+            course=enrollment.course
+        ).order_by("-date")
+
+    return render(request, "courses/attendance_details.html", {"enrollments": enrollments})
 
 
 def upload_grades(request, course_id):

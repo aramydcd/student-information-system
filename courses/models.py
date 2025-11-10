@@ -93,6 +93,7 @@ class Grade(models.Model):
 
     def save(self, *args, **kwargs):
         """Auto-calculate letter grade from score if not provided"""
+        self.score = int(self.score)
         if not self.letter_grade:
             if self.score >= 70:
                 self.letter_grade = 'A'
