@@ -1,27 +1,31 @@
-# mastering_git
-# Hi there, I'm aramydcd 👋
+# Student Information System (Django Web Application)
 
-🎓 **Student**  
-🐍 Passionate about Python  
-🚀 Currently exploring how GitHub works and learning by doing
+## Description
+A web application built with Django to practice backend development concepts such as
+authentication, CRUD operations, and database integration.
 
----
+## Features
+- User authentication
+- Role-based access control
+- Create, Read, Update, Delete (CRUD) Students and Courses Information
+- course management and allocation
+- Attendance and grade tracking
+- Database-backed models
+- Admin dashboard
 
-## About Me
+## Technologies Used
+- Python
+- Django
+- SQLite 
+- HTML, CSS, Bootstrap
 
-I'm a student diving into the world of programming, with a special interest in Python. My current journey is focused on understanding how GitHub works—collaborating, sharing code, and managing projects in the open-source ecosystem.
+## Usage
+1. Clone the repository
+2. Install required dependencies
+3. Run the Django development server
 
-## What I'm Working On
+## Status
+Personal learning project built to improve my backend development skills.
 
-- **Exploring how GitHub works:**  
-  Experimenting with repositories, issues, pull requests, and all the awesome features GitHub has to offer!
-
-## 📫 How to reach me
-
-Feel free to connect or check out my projects right here on GitHub!
-
----
-
-> “Learning never exhausts the mind.” – Leonardo da Vinci
-> "Never stop learning"
-
+## Author
+Abdulakeem Abdulazeez
