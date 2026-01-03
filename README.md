@@ -44,4 +44,5 @@ python manage.py migrate
 
 The system enforces a **75% attendance threshold** for exam eligibility. The backend aggregates attendance logs daily and updates a boolean `is_eligible` flag, which dynamically controls UI access to examination resources.
 
-```
+## Author
+Abdulakeem Abdulazeez
